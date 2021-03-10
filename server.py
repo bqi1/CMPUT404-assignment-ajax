@@ -99,11 +99,11 @@ def update(entity):
     return response
 
 
-@app.route("/world", methods=['POST','GET'])    
-def world():
+@app.route("/worldDifference", methods=['POST','GET'])    
+def worldDifference():
     '''you should probably return the world here'''
     client_world = flask_post_json()
-    if not myWorld.world:    # IF WORLD IS EMPTY, RETURN EMPTY WORLD WITH BOOLEAN AS TRUE. ELSE
+    if not myWorld.world():    # IF WORLD IS EMPTY, RETURN EMPTY WORLD WITH BOOLEAN AS TRUE. ELSE
         myWorld.set_cleared(True)
     else:
         myWorld.set_cleared(False)
@@ -117,6 +117,14 @@ def world():
     response = jsonify((myWorld.get_cleared(),to_add))
     response.status_code = 200
     return response
+
+@app.route("/world", methods=['POST','GET'])    
+def world():
+    '''you should probably return the world here'''
+    response = jsonify(myWorld.world())
+    response.status_code = 200
+    return response
+
 @app.route("/entity/<entity>")    
 def get_entity(entity):
     '''This is the GET version of the entity interface, return a representation of the entity'''
