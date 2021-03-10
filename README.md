@@ -1,3 +1,4 @@
+Brian Qi (bqi1)
 CMPUT404-assignment-ajax
 ==============================
 
