@@ -293,12 +293,17 @@ function update() {
     sendJSONXMLHTTPRequest("/worldDifference",world,world_callback)
     drawFrame();
 }
+function clearScreen(){
+    sendJSONXMLHTTPRequest("/clear",world,none);
+    console.log("sent");
 
+}
 // 30 frames per second
 setInterval( update, 1000/30.0);
 
 
 
     </script>
+<button onclick ="clearScreen()">Clear Screen</button>
 </body>
 </html>
