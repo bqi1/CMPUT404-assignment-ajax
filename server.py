@@ -22,7 +22,7 @@
 
 
 import flask
-from flask import Flask, request
+from flask import Flask, request, redirect, url_for, jsonify
 import json
 app = Flask(__name__)
 app.debug = True
@@ -36,6 +36,7 @@ app.debug = True
 class World:
     def __init__(self):
         self.clear()
+        self.cleared = False
         
     def update(self, entity, key, value):
         entry = self.space.get(entity,dict())
@@ -53,6 +54,12 @@ class World:
     
     def world(self):
         return self.space
+    def iscleared(self):
+        return self.cleared
+    def set_cleared(self,cleared):
+        self.cleared = cleared
+    def get_cleared(self):
+        return self.cleared
 
 # you can test your webservice from the commandline
 # curl -v   -H "Content-Type: application/json" -X PUT http://127.0.0.1:5000/entity/X -d '{"x":1,"y":1}' 
@@ -74,27 +81,58 @@ def flask_post_json():
 @app.route("/")
 def hello():
     '''Return something coherent here.. perhaps redirect to /static/index.html '''
-    return None
+    return redirect("/static/index.html", code = 301)
+
+
 
 @app.route("/entity/<entity>", methods=['POST','PUT'])
 def update(entity):
     '''update the entities via this interface'''
-    return None
+    data = flask_post_json()
+    if type(data) is dict and 'x' in data and 'y' in data:
+        myWorld.set(entity,data)
+        response = jsonify(data)
+        response.status_code = 200
+    else:
+        response = jsonify(success = False)
+        response.status_code = 400
+    return response
+
 
 @app.route("/world", methods=['POST','GET'])    
 def world():
     '''you should probably return the world here'''
-    return None
-
+    client_world = flask_post_json()
+    if not myWorld.world:    # IF WORLD IS EMPTY, RETURN EMPTY WORLD WITH BOOLEAN AS TRUE. ELSE
+        myWorld.set_cleared(True)
+    else:
+        myWorld.set_cleared(False)
+    # FOr each thing in myworld, if not in client's world, add in
+    to_add = []
+    for point_key in myWorld.world().keys():
+        if point_key in client_world and client_world[point_key] == myWorld.world()[point_key]:
+            continue
+        else:
+            to_add.append((point_key,myWorld.world()[point_key]))
+    response = jsonify((myWorld.get_cleared(),to_add))
+    response.status_code = 200
+    return response
 @app.route("/entity/<entity>")    
 def get_entity(entity):
     '''This is the GET version of the entity interface, return a representation of the entity'''
-    return None
-
+    try:
+        response = jsonify(myWorld.get(entity))
+        response.status_code = 200
+    except KeyError:
+        response = jsonify(found = False)
+        response.status_code = 200
+    return response
 @app.route("/clear", methods=['POST','GET'])
 def clear():
     '''Clear the world out!'''
-    return None
-
+    myWorld.clear()
+    response = jsonify(myWorld.world())
+    response.status_code = 200
+    return response
 if __name__ == "__main__":
     app.run()
