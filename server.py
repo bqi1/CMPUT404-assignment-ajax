@@ -60,6 +60,8 @@ class World:
         self.cleared = cleared
     def get_cleared(self):
         return self.cleared
+    def replace_space(self,newspace):
+        self.space = newspace
 
 # you can test your webservice from the commandline
 # curl -v   -H "Content-Type: application/json" -X PUT http://127.0.0.1:5000/entity/X -d '{"x":1,"y":1}' 
@@ -101,7 +103,7 @@ def update(entity):
 
 @app.route("/worldDifference", methods=['POST','GET'])    
 def worldDifference():
-    '''you should probably return the world here'''
+    '''returns a 2 item list. first item is whether world is cleared, second item is list of entities to add '''
     client_world = flask_post_json()
     if not myWorld.world():    # IF WORLD IS EMPTY, RETURN EMPTY WORLD WITH BOOLEAN AS TRUE. ELSE
         myWorld.set_cleared(True)
@@ -121,6 +123,10 @@ def worldDifference():
 @app.route("/world", methods=['POST','GET'])    
 def world():
     '''you should probably return the world here'''
+
+    if flask.request.method == 'POST':
+        potential_world_dict = flask_post_json()
+        myWorld.replace_space(potential_world_dict)
     response = jsonify(myWorld.world())
     response.status_code = 200
     return response

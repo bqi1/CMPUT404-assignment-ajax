@@ -92,10 +92,18 @@ class ServerTestCase(unittest.TestCase):
         newworld = json.loads(utf8(r.data))
         for key in self.world:
             self.assertTrue(self.world[key]  == newworld[key], "Key %s" % key)
+    def testPostWorld(self):
+        self.populateWorld()
+        r = self.app.post('/clear')
+        self.assertTrue(r.status_code == 200, "Code not 200!")
+        r = self.app.post(('/world'),
+                             data=json.dumps(self.world))
+        self.assertTrue(r.status_code == 200, f"Code not 200! It's {r.status_code}")
+        r = self.app.get('/world')
+        newworld = json.loads(utf8(r.data))
+        self.assertTrue(newworld == self.world)
 
-
-        
-        
+                
         
 
 if __name__ == '__main__':
