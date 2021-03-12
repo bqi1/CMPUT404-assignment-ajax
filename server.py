@@ -126,7 +126,8 @@ def world():
 
     if flask.request.method == 'POST':
         potential_world_dict = flask_post_json()
-        myWorld.replace_space(potential_world_dict)
+        if type(potential_world_dict) is dict:
+            myWorld.replace_space(potential_world_dict)
     response = jsonify(myWorld.world())
     response.status_code = 200
     return response
